@@ -1,0 +1,17 @@
+{
+  "appName": "SecIron Demo",
+  "apiBaseUrl": "https://api.seciron.local/v1/",
+  "featureToggle": {
+    "enableLogin": true,
+    "enableAnalytics": false,
+    "enableDebugMode": true
+  },
+  "security": {
+    "encryptionKey": "ABC123XYZ789",
+    "sdkVersion": "1.0.0-sec"
+  },
+  "user": {
+    "defaultUsername": "SecIronUser",
+    "defaultLanguage": "en"
+  }
+}
