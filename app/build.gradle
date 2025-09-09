@@ -45,6 +45,8 @@ dependencies {
     implementation libs.androidx.lifecycle.viewmodel.ktx
     implementation libs.androidx.navigation.fragment.ktx
     implementation "com.squareup.okhttp3:okhttp:4.12.0"
+    implementation libs.navigation.fragment.ktx
+    implementation libs.navigation.ui.ktx
 
     def camerax_version = "1.3.0"
     implementation "androidx.camera:camera-core:$camerax_version"
