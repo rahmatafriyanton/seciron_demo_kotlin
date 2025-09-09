@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
 import android.telephony.PhoneStateListener
@@ -28,6 +29,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var telephonyManager: TelephonyManager
     private var callStateCallback: TelephonyCallback? = null
     private var securityDialogShowing = false
+    private var audioManager: AudioManager? = null
 
     // ✅ Launcher untuk permission
     private val requestPermissionsLauncher =
@@ -80,6 +82,7 @@ class MainActivity : AppCompatActivity() {
         initPermissions()
 
         telephonyManager = getSystemService(TELEPHONY_SERVICE) as TelephonyManager
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
     }
 
     // ===================== Listener Seluler =====================
@@ -103,8 +106,19 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // ✅ Receiver VoIP (WA/Zoom/Telegram)
+        // ✅ Receiver VoIP (WA/Zoom/Telegram/Teams)
         registerReceiver(voipReceiver, IntentFilter("SECIRON_VOIP_CALL"), RECEIVER_EXPORTED)
+
+        // ✅ Listener AudioManager untuk outgoing VoIP
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            audioManager?.addOnModeChangedListener(mainExecutor) { mode ->
+                if (mode == AudioManager.MODE_IN_COMMUNICATION || mode == AudioManager.MODE_IN_CALL) {
+                    showSecurityPopupIfNeeded("Security Notice", "A VoIP call is active. For your security, sensitive features may be limited.")
+                } else {
+                    securityDialogShowing = false
+                }
+            }
+        }
     }
 
     override fun onStop() {
@@ -132,7 +146,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ===================== Listener VoIP =====================
+    // ===================== Listener VoIP (Notifikasi) =====================
     private val voipReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val active = intent?.getBooleanExtra("active", false) ?: false
@@ -143,7 +157,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
 
     // ===================== Pop-up Security =====================
     private fun showSecurityPopupIfNeeded(title: String, message: String) {
